@@ -1,730 +1,512 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Registro de Ventas</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            200: '#bae0fd',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#095186',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-        .card-shadow {
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Registro de Ventas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
 </head>
-<body class="text-slate-700 min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
 
-    <!-- Header Navigation -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-brand-600 text-white p-2.5 rounded-xl shadow-sm flex items-center justify-center">
-                    <i class="fa-solid fa-file-signature text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-slate-800 leading-tight">Sistema de Registro de Ventas</h1>
-                    <p class="text-xs text-slate-500">Formulario & Historial Centralizado</p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <span id="cloud-status-badge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                    <span class="w-2 h-2 mr-1.5 bg-amber-500 rounded-full animate-pulse"></span>
-                    Modo Local (Google Sheets pendiente)
-                </span>
-                <button onclick="exportAllJSON()" class="p-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Exportar Copia de Seguridad JSON">
-                    <i class="fa-solid fa-download"></i>
-                </button>
-            </div>
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 text-white p-2 rounded-lg">
+          <i class="fa-solid me-0 fa-chart-line text-xl"></i>
         </div>
-    </header>
+        <div>
+          <h1 class="font-bold text-slate-900 text-lg leading-tight">Sistema de Registro de Ventas</h1>
+          <p class="text-xs text-slate-500">Módulo de Ingreso de Datos y Captura</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+          <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+          Google Sheets Conectado
+        </span>
+      </div>
+    </div>
+  </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-8">
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-8">
+
+    <!-- FORM SECTION -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+        <h2 class="font-semibold text-lg flex items-center gap-2">
+          <i class="fa-solid fa-file-pen text-indigo-400"></i> Formulario de Ingreso
+        </h2>
+        <span class="text-xs text-slate-300">Todos los campos son obligatorios</span>
+      </div>
+
+      <form id="salesForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-8">
         
-        <!-- SECCIÓN SUPERIOR: FORMULARIO DISTRIBUIDO EN GRID -->
-        <section class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 card-shadow">
-            
-            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-pen-to-square text-brand-600"></i> Ingreso de Nueva Venta
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Complete todos los campos del cliente y la oferta elegida.</p>
-                </div>
-                <button type="button" onclick="openAddAdvisorModal()" class="text-xs font-medium text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 border border-brand-200">
-                    <i class="fa-solid fa-user-plus"></i> Añadir Asesor
-                </button>
-            </div>
-
-            <form id="salesForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
-                
-                <!-- BLOQUE 1: ASESOR -->
-                <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/60">
-                    <label for="advisorSelect" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-user-tie text-brand-600 mr-1"></i> Asesor *
-                    </label>
-                    <div class="relative">
-                        <select id="advisorSelect" required class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-3 pr-10 appearance-none transition shadow-sm">
-                            <option value="" disabled selected>-- Seleccione un Asesor --</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BLOQUE 2: DATOS DEL TITULAR -->
-                <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                        <i class="fa-solid fa-id-card text-slate-400"></i> Datos del Titular
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        
-                        <!-- Nombres Completos (Col-span 2) -->
-                        <div class="sm:col-span-2">
-                            <label for="fullName" class="block text-xs font-semibold text-slate-600 mb-1">Nombres Completos *</label>
-                            <input type="text" id="fullName" required placeholder="Ej: Juan Carlos Pérez Gómez" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Tipo de Documento -->
-                        <div>
-                            <label for="docType" class="block text-xs font-semibold text-slate-600 mb-1">Tipo de Documento *</label>
-                            <select id="docType" required class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                                <option value="DNI" selected>DNI</option>
-                                <option value="CEX">CEX</option>
-                                <option value="RUC 10">RUC 10</option>
-                                <option value="RUC 20">RUC 20</option>
-                            </select>
-                        </div>
-
-                        <!-- Número de Documento -->
-                        <div>
-                            <label for="docNumber" class="block text-xs font-semibold text-slate-600 mb-1">Número de Documento *</label>
-                            <input type="text" id="docNumber" required placeholder="Ingrese número" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Lugar de Nacimiento -->
-                        <div>
-                            <label for="birthPlace" class="block text-xs font-semibold text-slate-600 mb-1">Lugar de Nacimiento</label>
-                            <input type="text" id="birthPlace" placeholder="Ej: Lima, Perú" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Fecha de Nacimiento -->
-                        <div>
-                            <label for="birthDate" class="block text-xs font-semibold text-slate-600 mb-1">Fecha de Nacimiento</label>
-                            <input type="date" id="birthDate" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Nacionalidad -->
-                        <div>
-                            <label for="nationality" class="block text-xs font-semibold text-slate-600 mb-1">Nacionalidad</label>
-                            <input type="text" id="nationality" value="PERUANA" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Correo Electrónico -->
-                        <div>
-                            <label for="email" class="block text-xs font-semibold text-slate-600 mb-1">Correo Electrónico *</label>
-                            <input type="email" id="email" required placeholder="cliente@correo.com" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- BLOQUE 3: DIRECCIÓN -->
-                <div class="pt-2 border-t border-slate-100">
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                        <i class="fa-solid fa-location-dot text-slate-400"></i> Dirección
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        
-                        <!-- Tipo de Vivienda -->
-                        <div>
-                            <label for="housingType" class="block text-xs font-semibold text-slate-600 mb-1">Tipo de Vivienda *</label>
-                            <select id="housingType" required class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                                <option value="MULTIFAMILIAR">MULTIFAMILIAR</option>
-                                <option value="CONDOMINIO">CONDOMINIO</option>
-                                <option value="UNIFAMILIAR">UNIFAMILIAR</option>
-                            </select>
-                        </div>
-
-                        <!-- Dirección Completa (Col-span 2) -->
-                        <div class="sm:col-span-2">
-                            <label for="fullAddress" class="block text-xs font-semibold text-slate-600 mb-1">Dirección Completa *</label>
-                            <input type="text" id="fullAddress" required placeholder="Av. Principal #123 Mz. A Lt. 4" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Piso -->
-                        <div>
-                            <label for="floor" class="block text-xs font-semibold text-slate-600 mb-1">Piso</label>
-                            <input type="text" id="floor" placeholder="Ej: 3" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Interior -->
-                        <div>
-                            <label for="interior" class="block text-xs font-semibold text-slate-600 mb-1">Interior</label>
-                            <input type="text" id="interior" placeholder="Ej: 302" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Distrito -->
-                        <div>
-                            <label for="district" class="block text-xs font-semibold text-slate-600 mb-1">Distrito *</label>
-                            <input type="text" id="district" required placeholder="Ej: Miraflores" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Provincia -->
-                        <div>
-                            <label for="province" class="block text-xs font-semibold text-slate-600 mb-1">Provincia *</label>
-                            <input type="text" id="province" required placeholder="Ej: Lima" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Departamento -->
-                        <div>
-                            <label for="department" class="block text-xs font-semibold text-slate-600 mb-1">Departamento *</label>
-                            <input type="text" id="department" required placeholder="Ej: Lima" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Latitud Y -->
-                        <div>
-                            <label for="latitude" class="block text-xs font-semibold text-slate-600 mb-1">Latitud Y</label>
-                            <input type="text" id="latitude" placeholder="-12.046374" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                        <!-- Longitud X -->
-                        <div>
-                            <label for="longitude" class="block text-xs font-semibold text-slate-600 mb-1">Longitud X</label>
-                            <input type="text" id="longitude" placeholder="-77.042793" class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- BLOQUE 4: PRODUCTO -->
-                <div class="pt-2 border-t border-slate-100">
-                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                        <i class="fa-solid fa-box-open text-slate-400"></i> Producto
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        
-                        <!-- Ataque -->
-                        <div>
-                            <label for="attackZone" class="block text-xs font-semibold text-slate-600 mb-1">Ataque *</label>
-                            <select id="attackZone" required class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                                <option value="WIN - PROVINCIA">WIN - PROVINCIA</option>
-                                <option value="WIN - LIMA">WIN - LIMA</option>
-                            </select>
-                        </div>
-
-                        <!-- Oferta -->
-                        <div>
-                            <label for="offerPlan" class="block text-xs font-semibold text-slate-600 mb-1">Oferta *</label>
-                            <select id="offerPlan" required class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                                <option value="MONO 450 MBPS">MONO 450 MBPS</option>
-                                <option value="HB 550 MBPS">HB 550 MBPS</option>
-                                <option value="HB 750 MBPS">HB 750 MBPS</option>
-                                <option value="HB 1000 MBPS + L1MXP">HB 1000 MBPS + L1MXP</option>
-                                <option value="HB100 MBPS + DGOHOGAR">HB100 MBPS + DGOHOGAR</option>
-                            </select>
-                        </div>
-
-                        <!-- Precio de Oferta -->
-                        <div>
-                            <label for="offerPrice" class="block text-xs font-semibold text-slate-600 mb-1">Precio de Oferta *</label>
-                            <select id="offerPrice" required class="w-full bg-white border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-2.5 transition">
-                                <option value="S/79">S/79</option>
-                                <option value="S/89">S/89</option>
-                                <option value="S/89.9">S/89.9</option>
-                                <option value="S/99">S/99</option>
-                                <option value="S/99.9">S/99.9</option>
-                                <option value="S/129">S/129</option>
-                                <option value="S/129.9">S/129.9</option>
-                            </select>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- ACCIONES DEL FORMULARIO -->
-                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100 justify-end">
-                    <button type="button" onclick="resetForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2 text-sm">
-                        <i class="fa-solid fa-rotate-left"></i> Limpiar Formulario
-                    </button>
-                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg shadow-brand-500/20 transition transform active:scale-[0.99] flex items-center justify-center gap-2 text-sm">
-                        <i class="fa-solid fa-floppy-disk"></i> Registrar Venta
-                    </button>
-                </div>
-
-            </form>
-        </section>
-
-        <!-- SECCIÓN INFERIOR: HISTORIAL DE REGISTROS INGRESADOS (TABLA DE RESUMEN) -->
-        <section class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 card-shadow space-y-4">
-            
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-lg font-bold text-slate-800">Registros Ingresados</h2>
-                        <span id="salesCountBadge" class="bg-brand-50 text-brand-600 text-xs font-bold px-2.5 py-1 rounded-full border border-brand-200">0</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Listado de datos almacenados listos para sincronización con Google Sheets.</p>
-                </div>
-                
-                <div class="flex items-center gap-3 self-end sm:self-auto">
-                    <!-- Stat Suma -->
-                    <div class="text-right hidden sm:block px-3 py-1 bg-slate-50 rounded-lg border border-slate-200/60">
-                        <span class="text-[10px] text-slate-400 block font-medium">TOTAL ACUMULADO</span>
-                        <span id="totalAmountBadge" class="text-xs font-bold text-slate-700">S/ 0.00</span>
-                    </div>
-                    <button onclick="readFromGoogleSheets()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Sincronizar Sheets
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tabla de Registros -->
-            <div class="overflow-x-auto rounded-xl border border-slate-200">
-                <table class="w-full text-left text-xs text-slate-600">
-                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
-                        <tr>
-                            <th scope="col" class="py-3.5 px-4">Fecha / Hora</th>
-                            <th scope="col" class="py-3.5 px-4">Asesor</th>
-                            <th scope="col" class="py-3.5 px-4">Titular</th>
-                            <th scope="col" class="py-3.5 px-4">Documento</th>
-                            <th scope="col" class="py-3.5 px-4">Dirección / Ubicación</th>
-                            <th scope="col" class="py-3.5 px-4">Ataque / Oferta</th>
-                            <th scope="col" class="py-3.5 px-4">Precio</th>
-                            <th scope="col" class="py-3.5 px-4 text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="salesTableBody" class="divide-y divide-slate-100">
-                        <!-- Filas dinamicas -->
-                    </tbody>
-                </table>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
-            &copy; Sistema de Registro de Ventas. Todos los derechos reservados.
-        </div>
-    </footer>
-
-    <!-- MODAL: DETALLE COMPLETO DEL REGISTRO -->
-    <div id="detailModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-address-card text-brand-600"></i> Detalle de Registro de Venta
-                </h3>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div id="detailModalContent" class="text-xs space-y-3">
-                <!-- Contenido Dinamico -->
-            </div>
-            <div class="pt-3 border-t border-slate-100 text-right">
-                <button onclick="closeDetailModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-medium text-xs rounded-xl transition">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: AÑADIR NUEVO ASESOR -->
-    <div id="advisorModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all">
-            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
-                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus text-brand-600"></i> Agregar Nuevo Asesor
-                </h3>
-                <button onclick="closeAddAdvisorModal()" class="text-slate-400 hover:text-slate-600 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <form onsubmit="handleAddAdvisor(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Nombre Completo del Asesor *</label>
-                    <input type="text" id="newAdvisorName" required placeholder="Ej: CARLOS RAMIREZ" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 p-3">
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeAddAdvisorModal()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg shadow-sm transition">Agregar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL DE NOTIFICACIÓN -->
-    <div id="notificationModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
-            <div id="notificationIcon" class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-xl">
-                <i class="fa-solid fa-check"></i>
-            </div>
-            <div>
-                <h3 id="notificationTitle" class="font-bold text-slate-800 text-base">¡Operación Exitosa!</h3>
-                <p id="notificationMessage" class="text-xs text-slate-500 mt-1">Los datos han sido guardados correctamente.</p>
-            </div>
-            <button onclick="closeNotificationModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-medium text-xs rounded-xl transition">
-                Aceptar
+        <!-- BLOCK 1: ASESOR -->
+        <div>
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-4">
+            <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-user-tie"></i> 1. Información del Asesor
+            </h3>
+            <button type="button" onclick="openModal('addAdvisorModal')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1">
+              <i class="fa-solid fa-plus text-indigo-600"></i> Añadir Asesor
             </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Nombre del Asesor *</label>
+              <select id="asesorSelect" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                <option value="">-- Seleccionar Asesor --</option>
+              </select>
+            </div>
+          </div>
         </div>
+
+        <!-- BLOCK 2: DATOS DEL TITULAR -->
+        <div>
+          <div class="border-b border-slate-200 pb-2 mb-4">
+            <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-id-card"></i> 2. Datos del Titular
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="lg:col-span-2">
+              <label class="block text-xs font-medium text-slate-700 mb-1">Nombres Completos *</label>
+              <input type="text" id="nombresCompletos" required placeholder="Ej: Juan Carlos Pérez" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Tipo de Documento *</label>
+              <select id="tipoDoc" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                <option value="">-- Seleccionar --</option>
+                <option value="DNI">DNI</option>
+                <option value="CEX">CEX</option>
+                <option value="RUC 10">RUC 10</option>
+                <option value="RUC 20">RUC 20</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Número de Documento *</label>
+              <input type="text" id="numeroDoc" required placeholder="12345678" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Lugar de Nacimiento</label>
+              <input type="text" id="lugarNacimiento" placeholder="Ej: Lima" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Fecha de Nacimiento</label>
+              <input type="date" id="fechaNacimiento" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Nacionalidad</label>
+              <input type="text" id="nacionalidad" placeholder="Ej: Peruana" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Correo Electrónico *</label>
+              <input type="email" id="correo" required placeholder="cliente@correo.com" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOCK 3: DIRECCIÓN -->
+        <div>
+          <div class="border-b border-slate-200 pb-2 mb-4">
+            <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-location-dot"></i> 3. Dirección de Instalación
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Tipo de Vivienda *</label>
+              <select id="tipoVivienda" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                <option value="">-- Seleccionar --</option>
+                <option value="MULTIFAMILIAR">MULTIFAMILIAR</option>
+                <option value="CONDOMINIO">CONDOMINIO</option>
+              </select>
+            </div>
+
+            <div class="lg:col-span-3">
+              <label class="block text-xs font-medium text-slate-700 mb-1">Dirección Completa *</label>
+              <input type="text" id="direccionCompleta" required placeholder="Av./Calle, Número, Mz, Lote" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Piso</label>
+              <input type="text" id="piso" placeholder="Piso 1, 2..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Interior</label>
+              <input type="text" id="interior" placeholder="Dpto. 101" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Distrito *</label>
+              <input type="text" id="distrito" required placeholder="Ej: Miraflores" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Provincia *</label>
+              <input type="text" id="provincia" required placeholder="Ej: Lima" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Departamento *</label>
+              <input type="text" id="departamento" required placeholder="Ej: Lima" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Latitud (Y)</label>
+              <input type="text" id="latitud" placeholder="-12.046374" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Longitud (X)</label>
+              <input type="text" id="longitud" placeholder="-77.042793" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOCK 4: PRODUCTO -->
+        <div>
+          <div class="border-b border-slate-200 pb-2 mb-4">
+            <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-box"></i> 4. Producto
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Ataque *</label>
+              <select id="ataque" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                <option value="">-- Seleccionar --</option>
+                <option value="WIN - PROVINCIA">WIN - PROVINCIA</option>
+                <option value="WIN - LIMA">WIN - LIMA</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Oferta *</label>
+              <select id="oferta" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                <option value="">-- Seleccionar --</option>
+                <option value="MONO 450 MBPS">MONO 450 MBPS</option>
+                <option value="HB 550 MBPS">HB 550 MBPS</option>
+                <option value="HB 750 MBPS">HB 750 MBPS</option>
+                <option value="HB 1000 MBPS + L1MXP">HB 1000 MBPS + L1MXP</option>
+                <option value="HB100 MBPS + DGOHOGAR">HB100 MBPS + DGOHOGAR</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Precio de Oferta *</label>
+              <select id="precio" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+                <option value="">-- Seleccionar --</option>
+                <option value="S/79">S/79</option>
+                <option value="S/89">S/89</option>
+                <option value="S/89.9">S/89.9</option>
+                <option value="S/99">S/99</option>
+                <option value="S/99.9">S/99.9</option>
+                <option value="S/129">S/129</option>
+                <option value="S/129.9">S/129.9</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 flex justify-end">
+          <button type="submit" id="submitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition flex items-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> Registrar Venta
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- RECORDS SECTION -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-slate-100 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 class="font-semibold text-slate-800 text-lg flex items-center gap-2">
+            <i class="fa-solid fa-table-list text-indigo-600"></i> Registros Ingresados
+          </h2>
+          <p class="text-xs text-slate-500">Listado histórico local de ventas capturadas</p>
+        </div>
+        <div class="flex items-center gap-4 text-xs font-medium text-slate-600">
+          <div>Total: <span id="recordCount" class="font-bold text-slate-800">0</span> registros</div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-600">
+          <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200">
+            <tr>
+              <th class="px-4 py-3">Fecha / Hora</th>
+              <th class="px-4 py-3">Asesor</th>
+              <th class="px-4 py-3">Titular</th>
+              <th class="px-4 py-3">Documento</th>
+              <th class="px-4 py-3">Ubicación</th>
+              <th class="px-4 py-3">Oferta</th>
+              <th class="px-4 py-3">Precio</th>
+              <th class="px-4 py-3 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody" class="divide-y divide-slate-200">
+            <!-- Dynamic rows will be appended here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ADD ADVISOR -->
+  <div id="addAdvisorModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-slate-800">Añadir Nuevo Asesor</h3>
+        <button onclick="closeModal('addAdvisorModal')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <form onsubmit="handleAddAdvisor(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Nombre Completo del Asesor</label>
+          <input type="text" id="newAdvisorName" required placeholder="Ej: CARLOS MENDOZA" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none uppercase">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('addAdvisorModal')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">Guardar Asesor</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- SCRIPTS DE LÓGICA DE NEGOCIO Y CONEXIÓN HOOK SHEETS -->
-    <script>
-        // Lista por defecto de Asesores
-        const initialAdvisors = [
-            "ROSA RISCO", "ANGELA ADRIANO", "PATRICIA PEREZ", "CRISTIAN ESPINOZA", 
-            "MABEL DUEÑAS", "STEVE GONZALES", "YOSELIN SULCA", "YARIRA DIAZ", 
-            "FLOR TORERO", "YEFFERSON VIZA"
-        ];
+  <!-- MODAL: VIEW DETAILS -->
+  <div id="viewDetailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-indigo-600"></i> Detalle Completo de la Venta
+        </h3>
+        <button onclick="closeModal('viewDetailModal')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="modalDetailContent" class="space-y-4 text-sm text-slate-700">
+        <!-- Dynamic detail data -->
+      </div>
+      <div class="flex justify-end pt-4 border-t mt-4">
+        <button type="button" onclick="closeModal('viewDetailModal')" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-700">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
-        let advisors = [];
-        let salesRecords = [];
+  <script>
+    // URL DE GOOGLE APPS SCRIPT PRECONFIGURADA
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyM_1YoNfT_V0iG9NVrWXwm-QNlOz6yU1wwFfuQfbLyhLRO9ayYpUvGO35MMO422IwViQ/exec';
 
-        // Cargar datos iniciales
-        window.onload = function() {
-            loadAdvisors();
-            loadSalesRecords();
-        };
+    // Initial advisors
+    const initialAdvisors = [
+      "ROSA RISCO",
+      "ANGELA ADRIANO",
+      "PATRICIA PEREZ",
+      "CRISTIAN ESPINOZA",
+      "MABEL DUEÑAS",
+      "STEVE GONZALES",
+      "YOSELIN SULCA",
+      "YARIRA DIAZ",
+      "FLOR TORERO",
+      "YEFFERSON VIZA"
+    ];
 
-        // --- GESTIÓN DE ASESORES ---
-        function loadAdvisors() {
-            const savedAdvisors = localStorage.getItem('sales_advisors');
-            if (savedAdvisors) {
-                advisors = JSON.parse(savedAdvisors);
-            } else {
-                advisors = [...initialAdvisors];
-                localStorage.setItem('sales_advisors', JSON.stringify(advisors));
-            }
-            renderAdvisorOptions();
-        }
+    let advisors = JSON.parse(localStorage.getItem('advisors')) || initialAdvisors;
+    let salesRecords = JSON.parse(localStorage.getItem('salesRecords')) || [];
 
-        function renderAdvisorOptions() {
-            const select = document.getElementById('advisorSelect');
-            const currentValue = select.value;
-            select.innerHTML = '<option value="" disabled selected>-- Seleccione un Asesor --</option>';
-            
-            advisors.forEach(advisor => {
-                const opt = document.createElement('option');
-                opt.value = advisor;
-                opt.textContent = advisor;
-                select.appendChild(opt);
-            });
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', () => {
+      populateAdvisors();
+      renderRecordsTable();
+    });
 
-            if (currentValue && advisors.includes(currentValue)) {
-                select.value = currentValue;
-            }
-        }
+    function populateAdvisors() {
+      const select = document.getElementById('asesorSelect');
+      select.innerHTML = '<option value="">-- Seleccionar Asesor --</option>';
+      advisors.forEach(advisor => {
+        const option = document.createElement('option');
+        option.value = advisor;
+        option.textContent = advisor;
+        select.appendChild(option);
+      });
+    }
 
-        function openAddAdvisorModal() {
-            document.getElementById('advisorModal').classList.remove('hidden');
-            document.getElementById('newAdvisorName').focus();
-        }
+    function handleAddAdvisor(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('newAdvisorName');
+      const name = nameInput.value.trim().toUpperCase();
+      
+      if (name && !advisors.includes(name)) {
+        advisors.push(name);
+        localStorage.setItem('advisors', JSON.stringify(advisors));
+        populateAdvisors();
+        document.getElementById('asesorSelect').value = name;
+        nameInput.value = '';
+        closeModal('addAdvisorModal');
+      }
+    }
 
-        function closeAddAdvisorModal() {
-            document.getElementById('advisorModal').classList.add('hidden');
-            document.getElementById('newAdvisorName').value = '';
-        }
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const originalBtnContent = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Guardando...`;
 
-        function handleAddAdvisor(e) {
-            e.preventDefault();
-            const nameInput = document.getElementById('newAdvisorName');
-            const name = nameInput.value.trim().toUpperCase();
+      const formData = {
+        id: Date.now(),
+        fechaRegistro: new Date().toLocaleString('es-PE'),
+        asesor: document.getElementById('asesorSelect').value,
+        nombresCompletos: document.getElementById('nombresCompletos').value,
+        tipoDoc: document.getElementById('tipoDoc').value,
+        numeroDoc: document.getElementById('numeroDoc').value,
+        lugarNacimiento: document.getElementById('lugarNacimiento').value,
+        fechaNacimiento: document.getElementById('fechaNacimiento').value,
+        nacionalidad: document.getElementById('nacionalidad').value,
+        correo: document.getElementById('correo').value,
+        tipoVivienda: document.getElementById('tipoVivienda').value,
+        direccionCompleta: document.getElementById('direccionCompleta').value,
+        piso: document.getElementById('piso').value,
+        interior: document.getElementById('interior').value,
+        distrito: document.getElementById('distrito').value,
+        provincia: document.getElementById('provincia').value,
+        departamento: document.getElementById('departamento').value,
+        latitud: document.getElementById('latitud').value,
+        longitud: document.getElementById('longitud').value,
+        ataque: document.getElementById('ataque').value,
+        oferta: document.getElementById('oferta').value,
+        precio: document.getElementById('precio').value
+      };
 
-            if (name) {
-                if (!advisors.includes(name)) {
-                    advisors.push(name);
-                    localStorage.setItem('sales_advisors', JSON.stringify(advisors));
-                    renderAdvisorOptions();
-                    document.getElementById('advisorSelect').value = name;
-                    closeAddAdvisorModal();
-                    showNotification("Asesor Agregado", `Se ha añadido a "${name}" a la lista de asesores.`, "success");
-                } else {
-                    showNotification("Atención", "Este asesor ya existe en la lista.", "warning");
-                }
-            }
-        }
+      // Save locally first
+      salesRecords.unshift(formData);
+      localStorage.setItem('salesRecords', JSON.stringify(salesRecords));
+      renderRecordsTable();
 
-        // --- GESTIÓN DE REGISTROS DE VENTA ---
-        function loadSalesRecords() {
-            const savedSales = localStorage.getItem('sales_records');
-            if (savedSales) {
-                salesRecords = JSON.parse(savedSales);
-            } else {
-                salesRecords = [];
-            }
-            renderSalesTable();
-        }
+      // Send to Google Sheets
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
+        alert('✅ Venta registrada y enviada correctamente a Google Sheets (Hoja MSV).');
+        document.getElementById('salesForm').reset();
+      } catch (error) {
+        console.error('Error al enviar a Google Sheets:', error);
+        alert('⚠️ La venta se guardó localmente, pero hubo un detalle al conectar con Google Sheets.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnContent;
+      }
+    }
 
-            // Mapeo completo del objeto
-            const newRecord = {
-                id: Date.now(),
-                timestamp: new Date().toLocaleString('es-PE'),
-                advisor: document.getElementById('advisorSelect').value,
-                fullName: document.getElementById('fullName').value.trim(),
-                docType: document.getElementById('docType').value,
-                docNumber: document.getElementById('docNumber').value.trim(),
-                birthPlace: document.getElementById('birthPlace').value.trim(),
-                birthDate: document.getElementById('birthDate').value,
-                nationality: document.getElementById('nationality').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                housingType: document.getElementById('housingType').value,
-                fullAddress: document.getElementById('fullAddress').value.trim(),
-                floor: document.getElementById('floor').value.trim(),
-                interior: document.getElementById('interior').value.trim(),
-                district: document.getElementById('district').value.trim(),
-                province: document.getElementById('province').value.trim(),
-                department: document.getElementById('department').value.trim(),
-                latitude: document.getElementById('latitude').value.trim(),
-                longitude: document.getElementById('longitude').value.trim(),
-                attackZone: document.getElementById('attackZone').value,
-                offerPlan: document.getElementById('offerPlan').value,
-                offerPrice: document.getElementById('offerPrice').value,
-                syncedWithSheets: false
-            };
+    function renderRecordsTable() {
+      const tbody = document.getElementById('recordsTableBody');
+      const countEl = document.getElementById('recordCount');
+      
+      tbody.innerHTML = '';
+      countEl.textContent = salesRecords.length;
 
-            salesRecords.unshift(newRecord);
-            localStorage.setItem('sales_records', JSON.stringify(salesRecords));
+      if (salesRecords.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="px-4 py-8 text-center text-slate-400">
+              No hay registros de ventas ingresados todavía.
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
-            renderSalesTable();
-            showNotification("Venta Registrada", "El registro ha sido agregado correctamente en la tabla inferior.", "success");
-            resetForm();
-        }
+      salesRecords.forEach((record) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100 text-xs';
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-medium text-slate-700">${record.fechaRegistro}</td>
+          <td class="px-4 py-3 font-semibold text-indigo-600">${record.asesor}</td>
+          <td class="px-4 py-3 font-medium text-slate-800">${record.nombresCompletos}</td>
+          <td class="px-4 py-3">${record.tipoDoc}: ${record.numeroDoc}</td>
+          <td class="px-4 py-3">${record.distrito}, ${record.provincia}</td>
+          <td class="px-4 py-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-medium">${record.oferta}</span></td>
+          <td class="px-4 py-3 font-bold text-slate-800">${record.precio}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="viewRecordDetail(${record.id})" class="text-slate-500 hover:text-indigo-600 p-1">
+              <i class="fa-solid fa-eye text-sm"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-        function renderSalesTable() {
-            const tbody = document.getElementById('salesTableBody');
-            const countBadge = document.getElementById('salesCountBadge');
-            const totalAmountBadge = document.getElementById('totalAmountBadge');
+    function viewRecordDetail(id) {
+      const record = salesRecords.find(r => r.id === id);
+      if (!record) return;
 
-            countBadge.textContent = salesRecords.length;
+      const container = document.getElementById('modalDetailContent');
+      container.innerHTML = `
+        <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+          <div><strong class="text-slate-500">Fecha/Hora:</strong> ${record.fechaRegistro}</div>
+          <div><strong class="text-slate-500">Asesor:</strong> ${record.asesor}</div>
+          <div class="col-span-2 border-t pt-2 mt-1"></div>
+          <div><strong class="text-slate-500">Titular:</strong> ${record.nombresCompletos}</div>
+          <div><strong class="text-slate-500">Documento:</strong> ${record.tipoDoc} - ${record.numeroDoc}</div>
+          <div><strong class="text-slate-500">Nacimiento:</strong> ${record.fechaNacimiento || '-'} (${record.lugarNacimiento || '-'})</div>
+          <div><strong class="text-slate-500">Nacionalidad:</strong> ${record.nacionalidad || '-'}</div>
+          <div class="col-span-2"><strong class="text-slate-500">Correo:</strong> ${record.correo}</div>
+          <div class="col-span-2 border-t pt-2 mt-1"></div>
+          <div><strong class="text-slate-500">Vivienda:</strong> ${record.tipoVivienda}</div>
+          <div class="col-span-2"><strong class="text-slate-500">Dirección:</strong> ${record.direccionCompleta}</div>
+          <div><strong class="text-slate-500">Piso / Int:</strong> ${record.piso || '-'} / ${record.interior || '-'}</div>
+          <div><strong class="text-slate-500">Ubicación:</strong> ${record.distrito}, ${record.provincia}, ${record.departamento}</div>
+          <div><strong class="text-slate-500">Coordenadas:</strong> ${record.latitud || '-'}, ${record.longitud || '-'}</div>
+          <div class="col-span-2 border-t pt-2 mt-1"></div>
+          <div><strong class="text-slate-500">Ataque:</strong> ${record.ataque}</div>
+          <div><strong class="text-slate-500">Oferta:</strong> ${record.oferta}</div>
+          <div><strong class="text-slate-500">Precio:</strong> <span class="text-indigo-600 font-bold">${record.precio}</span></div>
+        </div>
+      `;
+      openModal('viewDetailModal');
+    }
 
-            // Calcular importe acumulado
-            let totalSum = 0;
-            salesRecords.forEach(r => {
-                const num = parseFloat(r.offerPrice.replace('S/', '').trim());
-                if (!isNaN(num)) totalSum += num;
-            });
-            totalAmountBadge.textContent = `S/ ${totalSum.toFixed(2)}`;
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
 
-            if (salesRecords.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="text-center py-8 text-slate-400 font-normal">
-                            <i class="fa-solid fa-inbox text-3xl mb-2 block"></i>
-                            No hay registros ingresados aún.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = salesRecords.map(item => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="py-3 px-4 font-medium text-slate-500 whitespace-nowrap">${item.timestamp}</td>
-                    <td class="py-3 px-4 font-semibold text-slate-800 whitespace-nowrap">${escapeHtml(item.advisor)}</td>
-                    <td class="py-3 px-4 font-medium text-slate-700 whitespace-nowrap">${escapeHtml(item.fullName)}</td>
-                    <td class="py-3 px-4 whitespace-nowrap">
-                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200">
-                            ${item.docType}: ${escapeHtml(item.docNumber)}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4 text-slate-600 max-w-xs truncate" title="${escapeHtml(item.fullAddress)}, ${escapeHtml(item.district)}">
-                        ${escapeHtml(item.fullAddress)} (${escapeHtml(item.district)})
-                    </td>
-                    <td class="py-3 px-4 whitespace-nowrap">
-                        <div class="text-slate-800 font-medium">${escapeHtml(item.offerPlan)}</div>
-                        <div class="text-[10px] text-brand-600 font-semibold">${escapeHtml(item.attackZone)}</div>
-                    </td>
-                    <td class="py-3 px-4 font-bold text-emerald-600 whitespace-nowrap">${item.offerPrice}</td>
-                    <td class="py-3 px-4 text-center whitespace-nowrap">
-                        <div class="flex items-center justify-center gap-1">
-                            <button onclick="viewRecordDetail(${item.id})" class="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Ver Detalle Completo">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                            <button onclick="deleteRecord(${item.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Eliminar localmente">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function viewRecordDetail(id) {
-            const record = salesRecords.find(r => r.id === id);
-            if (!record) return;
-
-            const modalContent = document.getElementById('detailModalContent');
-            modalContent.innerHTML = `
-                <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <div><span class="text-slate-400 block text-[10px]">ASESOR</span><span class="font-semibold text-slate-700">${escapeHtml(record.advisor)}</span></div>
-                    <div><span class="text-slate-400 block text-[10px]">FECHA REGISTRO</span><span class="font-semibold text-slate-700">${record.timestamp}</span></div>
-                </div>
-
-                <div class="space-y-1">
-                    <h4 class="font-bold text-slate-800 text-xs border-b pb-1 text-brand-600">TITULAR</h4>
-                    <p><strong>Nombres:</strong> ${escapeHtml(record.fullName)}</p>
-                    <p><strong>Documento:</strong> ${record.docType} - ${escapeHtml(record.docNumber)}</p>
-                    <p><strong>Fecha Nac.:</strong> ${record.birthDate || 'N/A'} | <strong>Lugar:</strong> ${escapeHtml(record.birthPlace || 'N/A')}</p>
-                    <p><strong>Nacionalidad:</strong> ${escapeHtml(record.nationality)}</p>
-                    <p><strong>Email:</strong> ${escapeHtml(record.email)}</p>
-                </div>
-
-                <div class="space-y-1">
-                    <h4 class="font-bold text-slate-800 text-xs border-b pb-1 text-brand-600">DIRECCIÓN</h4>
-                    <p><strong>Tipo Vivienda:</strong> ${record.housingType}</p>
-                    <p><strong>Dirección:</strong> ${escapeHtml(record.fullAddress)}</p>
-                    <p><strong>Piso/Int:</strong> ${escapeHtml(record.floor || '-')} / ${escapeHtml(record.interior || '-')}</p>
-                    <p><strong>Ubigeo:</strong> ${escapeHtml(record.district)}, ${escapeHtml(record.province)}, ${escapeHtml(record.department)}</p>
-                    <p><strong>GPS (Y, X):</strong> ${escapeHtml(record.latitude || '-')}, ${escapeHtml(record.longitude || '-')}</p>
-                </div>
-
-                <div class="space-y-1">
-                    <h4 class="font-bold text-slate-800 text-xs border-b pb-1 text-brand-600">OFERTA / PLAN</h4>
-                    <p><strong>Zona Ataque:</strong> ${escapeHtml(record.attackZone)}</p>
-                    <p><strong>Plan:</strong> ${escapeHtml(record.offerPlan)}</p>
-                    <p><strong>Precio:</strong> <span class="font-bold text-emerald-600">${record.offerPrice}</span></p>
-                </div>
-            `;
-
-            document.getElementById('detailModal').classList.remove('hidden');
-        }
-
-        function closeDetailModal() {
-            document.getElementById('detailModal').classList.add('hidden');
-        }
-
-        function deleteRecord(id) {
-            salesRecords = salesRecords.filter(r => r.id !== id);
-            localStorage.setItem('sales_records', JSON.stringify(salesRecords));
-            renderSalesTable();
-        }
-
-        function resetForm() {
-            document.getElementById('salesForm').reset();
-            document.getElementById('nationality').value = "PERUANA";
-        }
-
-        // --- PREPARACIÓN MODULAR PARA GOOGLE SHEETS ---
-        function readFromGoogleSheets() {
-            /* 
-               AQUÍ SE CONECTARÁ LATER A GOOGLE SHEETS VIA APPS SCRIPT / API:
-               ejemplo:
-               fetch('https://script.google.com/macros/s/AKfycb.../exec')
-                 .then(res => res.json())
-                 .then(data => { salesRecords = data; renderSalesTable(); });
-            */
-            showNotification(
-                "Módulo Google Sheets Preparado", 
-                `Actualmente en modo borrador local (${salesRecords.length} registros cargados). En el siguiente paso añadiremos la URL de tu App Script para leer/escribir.`, 
-                "warning"
-            );
-        }
-
-        function exportAllJSON() {
-            if (salesRecords.length === 0) {
-                showNotification("Sin datos", "No hay registros para exportar.", "warning");
-                return;
-            }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(salesRecords, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `ventas_backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // --- NOTIFICACIONES MODALES ---
-        function showNotification(title, message, type = "success") {
-            const modal = document.getElementById('notificationModal');
-            const titleEl = document.getElementById('notificationTitle');
-            const msgEl = document.getElementById('notificationMessage');
-            const iconEl = document.getElementById('notificationIcon');
-
-            titleEl.textContent = title;
-            msgEl.textContent = message;
-
-            if (type === "success") {
-                iconEl.className = "w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-xl";
-                iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
-            } else if (type === "warning") {
-                iconEl.className = "w-12 h-12 rounded-full bg-amber-100 text-amber-600 mx-auto flex items-center justify-center text-xl";
-                iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeNotificationModal() {
-            document.getElementById('notificationModal').classList.add('hidden');
-        }
-
-        // Auxiliar Sanitize Text
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
-            });
-        }
-    </script>
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+  </script>
 </body>
 </html>
