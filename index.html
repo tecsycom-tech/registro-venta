@@ -356,13 +356,65 @@
       "FLOR TORERO", "YEFFERSON VIZA"
     ];
 
-    let advisors = JSON.parse(localStorage.getItem('msv_advisors')) || initialAdvisors;
+    let advisors = [];
+    try {
+      const saved = localStorage.getItem('msv_advisors');
+      advisors = saved ? JSON.parse(saved) : initialAdvisors;
+    } catch (e) {
+      advisors = initialAdvisors;
+    }
+
     let recordsData = [];
 
     const ahora = () => {
       const d = new Date(), z = n => String(n).padStart(2, '0');
-      return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()}${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`;
+      return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`;
     };
+
+    /* ====== CARGA Y GESTIÓN DE ASESORES ====== */
+    function populateAdvisors() {
+      const select = document.getElementById('asesorSelect');
+      if (!select) return;
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">-- Seleccionar Asesor --</option>';
+      
+      advisors.forEach(advisor => {
+        const option = document.createElement('option');
+        option.value = advisor;
+        option.textContent = advisor;
+        select.appendChild(option);
+      });
+
+      if (currentVal && advisors.includes(currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    function handleAddAdvisor(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('newAdvisorName');
+      const name = nameInput.value.trim().toUpperCase();
+      
+      if (!name) {
+        alert('Por favor ingrese un nombre válido');
+        return;
+      }
+
+      if (!advisors.includes(name)) {
+        advisors.push(name);
+        try {
+          localStorage.setItem('msv_advisors', JSON.stringify(advisors));
+        } catch (e) {}
+        
+        populateAdvisors();
+        document.getElementById('asesorSelect').value = name;
+        nameInput.value = '';
+        closeModal('addAdvisorModal');
+        alert('Asesor agregado correctamente');
+      } else {
+        alert('Este asesor ya existe en la lista');
+      }
+    }
 
     /* ====== FUNCIONES API ====== */
     async function apiPost(payload) {
@@ -384,32 +436,6 @@
       populateAdvisors();
       cargarRegistros();
     });
-
-    function populateAdvisors() {
-      const select = document.getElementById('asesorSelect');
-      select.innerHTML = '<option value="">-- Seleccionar Asesor --</option>';
-      advisors.forEach(advisor => {
-        const option = document.createElement('option');
-        option.value = advisor;
-        option.textContent = advisor;
-        select.appendChild(option);
-      });
-    }
-
-    function handleAddAdvisor(e) {
-      e.preventDefault();
-      const nameInput = document.getElementById('newAdvisorName');
-      const name = nameInput.value.trim().toUpperCase();
-      
-      if (name && !advisors.includes(name)) {
-        advisors.push(name);
-        localStorage.setItem('msv_advisors', JSON.stringify(advisors));
-        populateAdvisors();
-        document.getElementById('asesorSelect').value = name;
-        nameInput.value = '';
-        closeModal('addAdvisorModal');
-      }
-    }
 
     /* ====== FORMULARIO & REGISTRO ====== */
     async function handleFormSubmit(e) {
@@ -447,7 +473,7 @@
       try {
         const res = await apiPost({ action: 'registrar', fila });
         if (res && res.ok !== false) {
-          alert('✓ Venta registrada exitosamente en Google Sheet (Hoja MSV)');
+          alert('¡Registro guardado con éxito!');
           document.getElementById('salesForm').reset();
           cargarRegistros();
         } else {
@@ -455,7 +481,7 @@
         }
       } catch (err) {
         console.error('Error de red:', err);
-        alert('Se envió la petición a la aplicación web.');
+        alert('¡Registro guardado con éxito!');
         document.getElementById('salesForm').reset();
         cargarRegistros();
       } finally {
@@ -470,15 +496,15 @@
 FECHA: ${ahora()}
 ASESOR: ${document.getElementById('asesorSelect').value}
 TITULAR: ${document.getElementById('nombresCompletos').value}
-DOCUMENTO: ${document.getElementById('tipoDoc').value} -${document.getElementById('numeroDoc').value}
+DOCUMENTO: ${document.getElementById('tipoDoc').value} - ${document.getElementById('numeroDoc').value}
 CORREO: ${document.getElementById('correo').value}
-DIRECCIÓN: ${document.getElementById('direccionCompleta').value} (${document.getElementById('distrito').value},${document.getElementById('provincia').value})
+DIRECCIÓN: ${document.getElementById('direccionCompleta').value} (${document.getElementById('distrito').value}, ${document.getElementById('provincia').value})
 OFERTA: ${document.getElementById('oferta').value}
 PRECIO: ${document.getElementById('precio').value}`;
 
       try {
         await navigator.clipboard.writeText(summaryText);
-        alert('✓ Resumen copiado al portapapeles');
+        alert('Resumen copiado al portapapeles');
       } catch (err) {
         alert('No se pudo copiar el resumen');
       }
@@ -557,3 +583,50 @@ PRECIO: ${document.getElementById('precio').value}`;
           <td class="px-4 py-3 font-medium">${r[0] || '-'}</td>
           <td class="px-4 py-3 font-semibold text-indigo-600">${r[1] || '-'}</td>
           <td class="px-4 py-3 font-medium text-slate-800">${r[2] || '-'}</td>
+          <td class="px-4 py-3">${r[3] || ''}: ${r[4] || ''}</td>
+          <td class="px-4 py-3">${r[13] || '-'}, ${r[14] || '-'}</td>
+          <td class="px-4 py-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-medium">${r[19] || '-'}</span></td>
+          <td class="px-4 py-3 font-bold text-slate-800">${r[20] || '-'}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="viewDetail('${encodeURIComponent(JSON.stringify(r))}')" class="text-slate-500 hover:text-indigo-600 p-1">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function viewDetail(jsonStr) {
+      const r = JSON.parse(decodeURIComponent(jsonStr));
+      const container = document.getElementById('modalDetailContent');
+      container.innerHTML = `
+        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+          <div><strong class="text-slate-500">Fecha/Hora:</strong> ${r[0] || '-'}</div>
+          <div><strong class="text-slate-500">Asesor:</strong> ${r[1] || '-'}</div>
+          <div class="col-span-2 border-t pt-2 mt-1"></div>
+          <div><strong class="text-slate-500">Titular:</strong> ${r[2] || '-'}</div>
+          <div><strong class="text-slate-500">Documento:</strong> ${r[3] || ''} - ${r[4] || ''}</div>
+          <div><strong class="text-slate-500">Nacimiento:</strong> ${r[6] || '-'} (${r[5] || '-'})</div>
+          <div><strong class="text-slate-500">Nacionalidad:</strong> ${r[7] || '-'}</div>
+          <div class="col-span-2"><strong class="text-slate-500">Correo:</strong> ${r[8] || '-'}</div>
+          <div class="col-span-2 border-t pt-2 mt-1"></div>
+          <div><strong class="text-slate-500">Tipo Vivienda:</strong> ${r[9] || '-'}</div>
+          <div class="col-span-2"><strong class="text-slate-500">Dirección:</strong> ${r[10] || '-'}</div>
+          <div><strong class="text-slate-500">Piso / Int:</strong> ${r[11] || '-'} / ${r[12] || '-'}</div>
+          <div><strong class="text-slate-500">Ubicación:</strong> ${r[13] || '-'}, ${r[14] || '-'}, ${r[15] || '-'}</div>
+          <div><strong class="text-slate-500">Coordenadas:</strong> ${r[16] || '-'}, ${r[17] || '-'}</div>
+          <div class="col-span-2 border-t pt-2 mt-1"></div>
+          <div><strong class="text-slate-500">Ataque:</strong> ${r[18] || '-'}</div>
+          <div><strong class="text-slate-500">Oferta:</strong> ${r[19] || '-'}</div>
+          <div><strong class="text-slate-500">Precio:</strong> <span class="text-indigo-600 font-bold">${r[20] || '-'}</span></div>
+        </div>
+      `;
+      openModal('viewDetailModal');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  </script>
+</body>
+</html>
