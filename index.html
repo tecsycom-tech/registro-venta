@@ -462,6 +462,14 @@
       return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()}`;
     };
 
+    /* ====== FUNCIÓN AUXILIAR FORMATO DOCUMENTO ====== */
+    function formatDocVal(tipo, num) {
+      const t = String(tipo || '').trim();
+      const n = String(num || '').trim();
+      if (!t) return n || '-';
+      return `${t}: ${n}`;
+    }
+
     /* ====== NAVEGACIÓN ENTRE PESTAÑAS PRINCIPALES ====== */
     function showMainTab(tab) {
       const secIngreso = document.getElementById('sectionIngreso');
@@ -690,6 +698,7 @@ PRECIO: ${document.getElementById('precio').value}`;
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
 
+        const docTexto = formatDocVal(r[3], r[4]);
         const estadoVal = r[21] || '-';
         const tecnicoVal = r[22] || '-';
         const estadoBadgeClass = getEstadoBadgeStyle(estadoVal);
@@ -699,7 +708,7 @@ PRECIO: ${document.getElementById('precio').value}`;
           <td class="p-2.5 font-medium">${r[0] || '-'}</td>
           <td class="p-2.5 font-semibold text-indigo-600">${r[1] || '-'}</td>
           <td class="p-2.5 font-medium text-slate-800">${r[2] || '-'}</td>
-          <td class="p-2.5">${r[3] || ''}: ${r[4] || ''}</td>
+          <td class="p-2.5">${docTexto}</td>
           <td class="p-2.5">${r[13] || '-'}, ${r[14] || '-'}</td>
           <td class="p-2.5"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold inline-block whitespace-normal">${r[19] || '-'}</span></td>
           <td class="p-2.5 font-bold text-slate-800">${r[20] || '-'}</td>
@@ -779,6 +788,7 @@ PRECIO: ${document.getElementById('precio').value}`;
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
 
+        const docTexto = formatDocVal(r[3], r[4]);
         const estadoVal = r[21] || '-';
         const tecnicoVal = r[22] || '-';
         const estadoBadgeClass = getEstadoBadgeStyle(estadoVal);
@@ -788,7 +798,7 @@ PRECIO: ${document.getElementById('precio').value}`;
           <td class="p-2.5 font-medium">${r[0] || '-'}</td>
           <td class="p-2.5 font-semibold text-indigo-600">${r[1] || '-'}</td>
           <td class="p-2.5 font-medium text-slate-800">${r[2] || '-'}</td>
-          <td class="p-2.5">${r[3] || ''}: ${r[4] || ''}</td>
+          <td class="p-2.5">${docTexto}</td>
           <td class="p-2.5">${r[13] || '-'}, ${r[14] || '-'}</td>
           <td class="p-2.5"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold inline-block whitespace-normal">${r[19] || '-'}</span></td>
           <td class="p-2.5 font-bold text-slate-800">${r[20] || '-'}</td>
