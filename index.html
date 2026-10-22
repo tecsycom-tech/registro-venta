@@ -774,7 +774,8 @@ PRECIO: ${document.getElementById('precio').value}`;
         return;
       }
 
-      filtered.slice().reverse().forEach((r, idx) => {
+      // Muestra los registros cronológicamente (el más antiguo primero)
+      filtered.forEach((r, idx) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
 
@@ -783,7 +784,7 @@ PRECIO: ${document.getElementById('precio').value}`;
         const estadoBadgeClass = getEstadoBadgeStyle(estadoVal);
 
         tr.innerHTML = `
-          <td class="p-2.5 font-semibold text-slate-400">${filtered.length - idx}</td>
+          <td class="p-2.5 font-semibold text-slate-400">${idx + 1}</td>
           <td class="p-2.5 font-medium">${r[0] || '-'}</td>
           <td class="p-2.5 font-semibold text-indigo-600">${r[1] || '-'}</td>
           <td class="p-2.5 font-medium text-slate-800">${r[2] || '-'}</td>
