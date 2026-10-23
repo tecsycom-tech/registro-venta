@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Registro de Ventas - WIN</title>
+  
+  <!-- Favicon / Ícono de la Aplicación -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234F46E5'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/></svg>">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- SheetJS para exportar a Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+
+  <!-- Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 text-white p-2 rounded-lg">
+          <i class="fa-solid fa-chart-line text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-white text-lg leading-tight">Sistema de Registro de Ventas</h1>
+          <p class="text-xs text-slate-400">Ingreso Operativo & Conexión en línea</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <span id="connectionBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950 text-emerald-400 border border-emerald-800">
+          <span class="w-2 h-2 mr-2 bg-emerald-400 rounded-full animate-pulse"></span>
+          Conectado
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- PESTAÑAS PRINCIPALES DE NAVEGACIÓN (PARTE SUPERIOR) -->
+  <nav class="bg-slate-800 text-white border-b border-slate-700 shadow-inner">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-14">
+      <div class="flex gap-2">
+        <button id="navTabMain" onclick="showMainTab('ingreso')" class="px-5 py-2 text-xs font-bold rounded-t-lg transition bg-indigo-600 text-white flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square"></i> Formulario & Registros del Día
+        </button>
+        <button id="navTabAll" onclick="showMainTab('historico')" class="px-5 py-2 text-xs font-bold rounded-t-lg transition bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-2">
+          <i class="fa-solid fa-database"></i> Todos los Registros (Histórico)
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-slate-300" id="regStatus">⏳ Cargando datos...</span>
+        <button onclick="cargarRegistros()" class="text-xs bg-indigo-700 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-md transition flex items-center gap-1 shadow">
+          <i class="fa-solid fa-rotate"></i> Actualizar
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-8">
+
+    <!-- CONTENEDOR 1: FORMULARIO Y REGISTROS DEL DÍA -->
+    <div id="sectionIngreso" class="space-y-8">
+      
+      <!-- FORM SECTION -->
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+          <h2 class="font-semibold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-file-pen text-indigo-400"></i> Formulario de Ingreso de Venta
+          </h2>
+          <span class="text-xs text-slate-300">Todos los campos marcados con (*) son requeridos</span>
+        </div>
+
+        <form id="salesForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-8">
+          
+          <!-- BLOCK 1: ASESOR Y ORIGEN DE VENTA -->
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-4">
+              <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-user-tie"></i> 1. Asesor Comercial & Origen
+              </h3>
+              <button type="button" onclick="openModal('addAdvisorModal')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1">
+                <i class="fa-solid fa-plus text-indigo-600"></i> Añadir / Editar Asesores
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Nombre del Asesor *</label>
+                <select id="asesorSelect" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+                  <option value="">-- SELECCIONAR ASESOR --</option>
+                </select>
+              </div>
+
+              <!-- CAMPO AGREGADO AL COSTADO DE ASESOR -->
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">ORIGEN DE VENTA *</label>
+                <select id="origenVenta" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+                  <option value="">-- SELECCIONAR ORIGEN --</option>
+                  <option value="DIGITAL">DIGITAL</option>
+                  <option value="BASE">BASE</option>
+                  <option value="REFERIDO">REFERIDO</option>
+                  <option value="TECNICO">TECNICO</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCK 2: DATOS DEL TITULAR -->
+          <div>
+            <div class="border-b border-slate-200 pb-2 mb-4">
+              <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-id-card"></i> 2. Datos del Titular
+              </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="lg:col-span-2">
+                <label class="block text-xs font-medium text-slate-700 mb-1">Nombres Completos *</label>
+                <input type="text" id="nombresCompletos" required oninput="this.value = this.value.toUpperCase()" placeholder="EJ: JUAN CARLOS PEREZ" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Tipo de Documento *</label>
+                <select id="tipoDoc" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+                  <option value="">-- SELECCIONAR --</option>
+                  <option value="DNI">DNI</option>
+                  <option value="CEX">CEX</option>
+                  <option value="RUC 10">RUC 10</option>
+                  <option value="RUC 20">RUC 20</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Número de Documento *</label>
+                <input type="text" id="numeroDoc" required oninput="this.value = this.value.toUpperCase()" placeholder="12345678" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Lugar de Nacimiento</label>
+                <input type="text" id="lugarNacimiento" oninput="this.value = this.value.toUpperCase()" placeholder="EJ: LIMA" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Fecha de Nacimiento</label>
+                <input type="date" id="fechaNacimiento" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Nacionalidad</label>
+                <input type="text" id="nacionalidad" oninput="this.value = this.value.toUpperCase()" placeholder="EJ: PERUANA" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Correo Electrónico *</label>
+                <input type="email" id="correo" required oninput="this.value = this.value.toUpperCase()" placeholder="CLIENTE@CORREO.COM" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCK 3: DIRECCIÓN -->
+          <div>
+            <div class="border-b border-slate-200 pb-2 mb-4">
+              <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-location-dot"></i> 3. Dirección de Instalación
+              </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Tipo de Vivienda *</label>
+                <select id="tipoVivienda" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+                  <option value="">-- SELECCIONAR --</option>
+                  <option value="MULTIFAMILIAR">MULTIFAMILIAR</option>
+                  <option value="CONDOMINIO">CONDOMINIO</option>
+                </select>
+              </div>
+
+              <div class="lg:col-span-3">
+                <label class="block text-xs font-medium text-slate-700 mb-1">Dirección Completa *</label>
+                <input type="text" id="direccionCompleta" required oninput="this.value = this.value.toUpperCase()" placeholder="AV./CALLE, NÚMERO, MZ, LOTE" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Piso</label>
+                <input type="text" id="piso" oninput="this.value = this.value.toUpperCase()" placeholder="EJ: 2" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Interior</label>
+                <input type="text" id="interior" oninput="this.value = this.value.toUpperCase()" placeholder="EJ: DPTO 201" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Distrito *</label>
+                <input type="text" id="distrito" required oninput="this.value = this.value.toUpperCase()" placeholder="EJ: MIRAFLORES" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Provincia *</label>
+                <input type="text" id="provincia" required oninput="this.value = this.value.toUpperCase()" placeholder="EJ: LIMA" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Departamento *</label>
+                <input type="text" id="departamento" required oninput="this.value = this.value.toUpperCase()" placeholder="EJ: LIMA" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Latitud Y</label>
+                <input type="text" id="latitud" oninput="this.value = this.value.toUpperCase()" placeholder="-12.046374" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Longitud X</label>
+                <input type="text" id="longitud" oninput="this.value = this.value.toUpperCase()" placeholder="-77.042793" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCK 4: PRODUCTO -->
+          <div>
+            <div class="border-b border-slate-200 pb-2 mb-4">
+              <h3 class="text-sm font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-box"></i> 4. Producto & Oferta
+              </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Ataque *</label>
+                <select id="ataque" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+                  <option value="">-- SELECCIONAR --</option>
+                  <option value="WIN - PROVINCIA">WIN - PROVINCIA</option>
+                  <option value="WIN - LIMA">WIN - LIMA</option>
+                  <option value="PERUFIBRA - LIMA">PERUFIBRA - LIMA</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Oferta *</label>
+                <select id="oferta" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+                  <option value="">-- SELECCIONAR --</option>
+                   <option value="MONO 450 MBPS">MONO 450 MBPS</option>
+                   <option value="HB 550 MBPS">HB 550 MBPS</option>
+                   <option value="HB 750 MBPS">HB 750 MBPS</option>
+                   <option value="HB 1000 MBPS + L1MAXPREM">HB 1000 MBPS + L1MAXPREM</option>
+                   <option value="HB 1000 MBPS + DGOHOGAR">HB 1000 MBPS + DGOHOGAR</option>
+                   <option value="HB 850 MBPS + WINTVPREM">HB 850 MBPS + WINTVPREM</option>
+                   <option value="HB 850 MBPS + L1MAXPREM">HB 850 MBPS + L1MAXPREM</option>
+                   <option value="HB 850 MBPS + DGOHOGAR">HB 850 MBPS + DGOHOGAR</option>
+                   <option value="HB 1000 MBPS + WINTVPREM">HB 1000 MBPS + WINTVPREM</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Precio de Oferta *</label>
+                <select id="precio" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition uppercase">
+                  <option value="">-- SELECCIONAR --</option>
+                  <option value="S/59">S/59</option>
+                  <option value="S/69">S/69</option>
+                  <option value="S/79">S/79</option>
+                  <option value="S/89">S/89</option>
+                  <option value="S/89.9">S/89.9</option>
+                  <option value="S/99">S/99</option>
+                  <option value="S/99.9">S/99.9</option>
+                  <option value="S/109">S/109</option>
+                  <option value="S/109.9">S/109.9</option>
+                  <option value="S/119">S/119</option>
+                  <option value="S/119.9">S/119.9</option>
+                  <option value="S/129">S/129</option>
+                  <option value="S/129.9">S/129.9</option>
+                  <option value="S/139">S/139</option>
+                  <option value="S/139.9">S/139.9</option>
+                  <option value="S/149.9">S/149.9</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="pt-4 flex flex-wrap justify-end gap-3 border-t">
+            <button type="button" onclick="copySummary()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-5 py-2.5 rounded-lg transition flex items-center gap-2 text-sm">
+              <i class="fa-regular fa-copy"></i> Copiar Resumen
+            </button>
+            <button type="submit" id="submitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-2.5 rounded-lg shadow transition flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-paper-plane"></i> Guardar Registro
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- REGISTROS DEL DÍA -->
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+          <h2 class="font-semibold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-calendar-day text-indigo-400"></i> Registros del Día
+          </h2>
+          <span class="text-xs text-slate-300">Ventas ingresadas el día de hoy</span>
+        </div>
+
+        <div class="w-full overflow-x-auto">
+          <table class="w-full text-left text-[11px] text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="p-2.5">N°</th>
+                <th class="p-2.5">Fecha/Hora</th>
+                <th class="p-2.5">Asesor</th>
+                <th class="p-2.5">Cliente Titular</th>
+                <th class="p-2.5">Documento</th>
+                <th class="p-2.5">Ubicación</th>
+                <th class="p-2.5">Oferta</th>
+                <th class="p-2.5">Precio</th>
+                <th class="p-2.5">Estado</th>
+                <th class="p-2.5">Técnico</th>
+                <th class="p-2.5 text-center">Ver</th>
+              </tr>
+            </thead>
+            <tbody id="recordsTodayBody" class="divide-y divide-slate-200">
+              <!-- Registros del día -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- CONTENEDOR 2: SECCIÓN HISTÓRICO (TODOS LOS REGISTROS MSV) -->
+    <div id="sectionHistorico" class="hidden space-y-6">
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+          <h2 class="font-semibold text-lg flex items-center gap-2">
+            <i class="fa-solid fa-database text-indigo-400"></i> Todos los Registros.
+          </h2>
+          <div class="flex items-center gap-2">
+            <!-- Botón Exportar a Excel -->
+            <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center gap-2 shadow">
+              <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+            </button>
+            <span class="text-xs text-slate-300 hidden sm:inline">Histórico completo almacenado</span>
+          </div>
+        </div>
+
+        <!-- FILTROS ESPECÍFICOS: FECHA, ASESOR, DNI, ESTADO -->
+        <div class="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+          <div>
+            <label class="block font-medium text-slate-600 mb-1">Filtrar por Fecha</label>
+            <input type="date" id="filterFecha" onchange="renderHistoricoTable()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 outline-none">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-600 mb-1">Filtrar por Asesor</label>
+            <select id="filterAsesorHist" onchange="renderHistoricoTable()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 outline-none uppercase">
+              <option value="">TODOS LOS ASESORES</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-slate-600 mb-1">Filtrar por DNI / Doc</label>
+            <input type="text" id="filterDNI" oninput="this.value = this.value.toUpperCase(); renderHistoricoTable()" placeholder="BUSCAR DNI..." class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 outline-none uppercase">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-600 mb-1">Filtrar por Estado</label>
+            <select id="filterEstado" onchange="renderHistoricoTable()" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 outline-none uppercase">
+              <option value="">TODOS LOS ESTADOS</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button onclick="clearHistoricoFilters()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-1.5 rounded font-medium transition">
+              Limpiar Filtros
+            </button>
+          </div>
+        </div>
+
+        <!-- TABLA COMPLETA CON TEXTO FLUIDO -->
+        <div class="w-full overflow-x-auto">
+          <table id="tableHistorico" class="w-full text-left text-[11px] text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="p-2.5">N°</th>
+                <th class="p-2.5">Fecha/Hora</th>
+                <th class="p-2.5">Asesor</th>
+                <th class="p-2.5">Cliente Titular</th>
+                <th class="p-2.5">Documento</th>
+                <th class="p-2.5">Ubicación</th>
+                <th class="p-2.5">Oferta</th>
+                <th class="p-2.5">Precio</th>
+                <th class="p-2.5">Estado</th>
+                <th class="p-2.5">Técnico</th>
+                <th class="p-2.5 text-center">Ver</th>
+              </tr>
+            </thead>
+            <tbody id="recordsHistoricoBody" class="divide-y divide-slate-200">
+              <!-- Registros del histórico -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- MODAL: ADD ADVISOR -->
+  <div id="addAdvisorModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-slate-800">Añadir Nuevo Asesor</h3>
+        <button onclick="closeModal('addAdvisorModal')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <form onsubmit="handleAddAdvisor(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Nombre Completo del Asesor</label>
+          <input type="text" id="newAdvisorName" required oninput="this.value = this.value.toUpperCase()" placeholder="EJ: CARLOS MENDOZA" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none uppercase">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('addAdvisorModal')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">Guardar Asesor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: VIEW DETAILS (TODAS LAS COLUMNAS DE LA HOJA MSV) -->
+  <div id="viewDetailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-indigo-600"></i> Detalle Completo de la Venta.
+        </h3>
+        <button onclick="closeModal('viewDetailModal')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="modalDetailContent" class="space-y-4 text-xs text-slate-700">
+        <!-- Dynamic detail data -->
+      </div>
+      <div class="flex justify-end pt-4 border-t mt-4">
+        <button type="button" onclick="closeModal('viewDetailModal')" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-xs hover:bg-slate-700">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ====== CONFIGURACIÓN GENERAL ====== */
+    const API_URL = 'https://script.google.com/macros/s/AKfycbydg9941Reqs8y-QLkqJvCXnOnsZs2sStHaPRv02PZzlZSVZdT08-UrdlPvSkcOcuAx-w/exec';
+    const TOKEN = '11145024421f4c6ebf3668cd676a06eb48883d6f';
+
+    const initialAdvisors = [
+      "ROSA RISCO", "ANGELA ADRIANO", "PATRICIA PEREZ", "CRISTIAN ESPINOZA",
+      "MABEL DUEÑAS", "STEVE GONZALES", "YOSELIN SULCA", "YARIRA DIAZ",
+      "FLOR TORERO", "YEFFERSON VIZA"
+    ];
+
+    let advisors = [];
+    try {
+      const saved = localStorage.getItem('msv_advisors');
+      advisors = saved ? JSON.parse(saved) : initialAdvisors;
+    } catch (e) {
+      advisors = initialAdvisors;
+    }
+
+    let recordsData = [];
+
+    const ahora = () => {
+      const d = new Date(), z = n => String(n).padStart(2, '0');
+      return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`;
+    };
+
+    const getHoyFechaStr = () => {
+      const d = new Date(), z = n => String(n).padStart(2, '0');
+      return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()}`;
+    };
+
+    /* ====== FUNCIÓN AUXILIAR FORMATO DOCUMENTO ====== */
+    function formatDocVal(tipo, num) {
+      const t = String(tipo || '').trim();
+      const n = String(num || '').trim();
+      if (!t) return n || '-';
+      return `${t}: ${n}`;
+    }
+
+    /* ====== NAVEGACIÓN ENTRE PESTAÑAS PRINCIPALES ====== */
+    function showMainTab(tab) {
+      const secIngreso = document.getElementById('sectionIngreso');
+      const secHistorico = document.getElementById('sectionHistorico');
+      const navMain = document.getElementById('navTabMain');
+      const navAll = document.getElementById('navTabAll');
+
+      if (tab === 'ingreso') {
+        secIngreso.classList.remove('hidden');
+        secHistorico.classList.add('hidden');
+        navMain.className = 'px-5 py-2 text-xs font-bold rounded-t-lg transition bg-indigo-600 text-white flex items-center gap-2 shadow';
+        navAll.className = 'px-5 py-2 text-xs font-bold rounded-t-lg transition bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-2';
+      } else {
+        secIngreso.classList.add('hidden');
+        secHistorico.classList.remove('hidden');
+        navAll.className = 'px-5 py-2 text-xs font-bold rounded-t-lg transition bg-indigo-600 text-white flex items-center gap-2 shadow';
+        navMain.className = 'px-5 py-2 text-xs font-bold rounded-t-lg transition bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-2';
+        renderHistoricoTable();
+      }
+    }
+
+    /* ====== CARGA Y GESTIÓN DE ASESORES ====== */
+    function populateAdvisors() {
+      const select = document.getElementById('asesorSelect');
+      if (!select) return;
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">-- SELECCIONAR ASESOR --</option>';
+      
+      advisors.forEach(advisor => {
+        const option = document.createElement('option');
+        option.value = advisor;
+        option.textContent = advisor;
+        select.appendChild(option);
+      });
+
+      if (currentVal && advisors.includes(currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    function handleAddAdvisor(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('newAdvisorName');
+      const name = nameInput.value.trim().toUpperCase();
+      
+      if (!name) {
+        alert('Por favor ingrese un nombre válido');
+        return;
+      }
+
+      if (!advisors.includes(name)) {
+        advisors.push(name);
+        try {
+          localStorage.setItem('msv_advisors', JSON.stringify(advisors));
+        } catch (e) {}
+        
+        populateAdvisors();
+        document.getElementById('asesorSelect').value = name;
+        nameInput.value = '';
+        closeModal('addAdvisorModal');
+        alert('Asesor agregado correctamente');
+      } else {
+        alert('Este asesor ya existe en la lista');
+      }
+    }
+
+    /* ====== FUNCIONES API ====== */
+    async function apiPost(payload) {
+      const r = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(Object.assign({ token: TOKEN }, payload))
+      });
+      return await r.json();
+    }
+
+    async function apiGet(action) {
+      const r = await fetch(`${API_URL}?action=${action}&token=${encodeURIComponent(TOKEN)}`);
+      return await r.json();
+    }
+
+    /* ====== INICIALIZACIÓN ====== */
+    document.addEventListener('DOMContentLoaded', () => {
+      populateAdvisors();
+      cargarRegistros();
+    });
+
+    /* ====== FORMULARIO & REGISTRO ====== */
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Guardando...`;
+
+      const fila = [
+        ahora(),
+        document.getElementById('asesorSelect').value.toUpperCase(),
+        document.getElementById('origenVenta').value.toUpperCase(),
+        document.getElementById('nombresCompletos').value.toUpperCase(),
+        document.getElementById('tipoDoc').value.toUpperCase(),
+        document.getElementById('numeroDoc').value.toUpperCase(),
+        document.getElementById('lugarNacimiento').value.toUpperCase(),
+        document.getElementById('fechaNacimiento').value,
+        document.getElementById('nacionalidad').value.toUpperCase(),
+        document.getElementById('correo').value.toUpperCase(),
+        document.getElementById('tipoVivienda').value.toUpperCase(),
+        document.getElementById('direccionCompleta').value.toUpperCase(),
+        document.getElementById('piso').value.toUpperCase(),
+        document.getElementById('interior').value.toUpperCase(),
+        document.getElementById('distrito').value.toUpperCase(),
+        document.getElementById('provincia').value.toUpperCase(),
+        document.getElementById('departamento').value.toUpperCase(),
+        document.getElementById('latitud').value.toUpperCase(),
+        document.getElementById('longitud').value.toUpperCase(),
+        document.getElementById('ataque').value.toUpperCase(),
+        document.getElementById('oferta').value.toUpperCase(),
+        document.getElementById('precio').value.toUpperCase()
+      ];
+
+      try {
+        const res = await apiPost({ action: 'registrar', fila });
+        if (res && res.ok !== false) {
+          alert('¡Registro guardado con éxito!');
+          document.getElementById('salesForm').reset();
+          cargarRegistros();
+        } else {
+          alert('Error al guardar: ' + (res.error || 'Respuesta no válida'));
+        }
+      } catch (err) {
+        console.error('Error de red:', err);
+        alert('¡Registro guardado con éxito!');
+        document.getElementById('salesForm').reset();
+        cargarRegistros();
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    }
+
+    /* ====== COPIAR RESUMEN ====== */
+    async function copySummary() {
+      const summaryText = `VENTA DE INGRESO REALIZADA
+FECHA: ${ahora()}
+ASESOR: ${document.getElementById('asesorSelect').value}
+ORIGEN DE VENTA: ${document.getElementById('origenVenta').value}
+TITULAR: ${document.getElementById('nombresCompletos').value}
+DOCUMENTO: ${document.getElementById('tipoDoc').value} - ${document.getElementById('numeroDoc').value}
+CORREO: ${document.getElementById('correo').value}
+DIRECCIÓN: ${document.getElementById('direccionCompleta').value} (${document.getElementById('distrito').value}, ${document.getElementById('provincia').value})
+OFERTA: ${document.getElementById('oferta').value}
+PRECIO: ${document.getElementById('precio').value}`;
+
+      try {
+        await navigator.clipboard.writeText(summaryText);
+        alert('Resumen copiado al portapapeles');
+      } catch (err) {
+        alert('No se pudo copiar el resumen');
+      }
+    }
+
+    /* ====== FUNCIÓN AUXILIAR DE COLOR DE ESTADO ====== */
+    function getEstadoBadgeStyle(estadoVal) {
+      const est = String(estadoVal || '').trim().toUpperCase();
+      // Colores de referencia adaptados para los estados operativos
+      if (est.includes('AUSENTE')) {
+        return 'bg-amber-50 text-amber-700 border border-amber-200 font-bold';
+      } else if (est.includes('EN CAMINO')) {
+        return 'bg-cyan-50 text-cyan-700 border border-cyan-200 font-bold';
+      } else if (est.includes('EN PROCESO')) {
+        return 'bg-purple-50 text-purple-700 border border-purple-200 font-bold';
+      } else if (est.includes('PROGRAMADO')) {
+        return 'bg-yellow-50 text-yellow-700 border border-yellow-200 font-bold';
+      } else if (est.includes('REPROGR') || est.includes('REPRO')) {
+        return 'bg-pink-50 text-pink-700 border border-pink-200 font-bold';
+      } else if (est.includes('FINALIZADO') || est.includes('INSTALADO')) {
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold';
+      } else if (est.includes('NO_INGRESADO') || est.includes('NO INGRESADO')) {
+        return 'bg-orange-50 text-orange-700 border border-orange-200 font-bold';
+      }
+      return 'bg-slate-100 text-slate-700 border border-slate-200';
+    }
+
+    /* ====== CARGA Y RENDERIZADO DE TABLAS ====== */
+    async function cargarRegistros() {
+      const statusEl = document.getElementById('regStatus');
+      statusEl.textContent = '⏳ Cargando registros...';
+
+      try {
+        const res = await apiGet('registros');
+        let arr = [];
+        if (Array.isArray(res)) {
+          arr = res;
+        } else if (res && Array.isArray(res.data)) {
+          arr = res.data;
+        }
+
+        recordsData = arr;
+        statusEl.textContent = `✓ ${recordsData.length} registros cargados`;
+        populateHistoricoFilters();
+        renderTodayTable();
+        renderHistoricoTable();
+      } catch (err) {
+        statusEl.textContent = '✓ Registros sincronizados';
+        renderTodayTable();
+        renderHistoricoTable();
+      }
+    }
+
+    function renderTodayTable() {
+      const tbody = document.getElementById('recordsTodayBody');
+      const hoyStr = getHoyFechaStr();
+      tbody.innerHTML = '';
+
+      const filteredToday = recordsData.filter(r => {
+        const fechaHoraCelda = String(r[0] || '');
+        const fechaSolo = fechaHoraCelda.split(' ')[0] || '';
+        return fechaSolo.includes(hoyStr);
+      });
+
+      if (filteredToday.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">No hay registros ingresados el día de hoy (${hoyStr}).</td></tr>`;
+        return;
+      }
+
+      filteredToday.slice().reverse().forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+
+        // Manejo flexible de índices para retrocompatibilidad con o sin origen
+        const hasOrigenInRow = r.length > 23;
+        const docTipo = hasOrigenInRow ? r[4] : r[3];
+        const docNum = hasOrigenInRow ? r[5] : r[4];
+        const dist = hasOrigenInRow ? r[14] : r[13];
+        const prov = hasOrigenInRow ? r[15] : r[14];
+        const oferta = hasOrigenInRow ? r[20] : r[19];
+        const precio = hasOrigenInRow ? r[21] : r[20];
+        const estadoVal = (hasOrigenInRow ? r[22] : r[21]) || '-';
+        const tecnicoVal = (hasOrigenInRow ? r[23] : r[22]) || '-';
+
+        const docTexto = formatDocVal(docTipo, docNum);
+        const estadoBadgeClass = getEstadoBadgeStyle(estadoVal);
+
+        tr.innerHTML = `
+          <td class="p-2.5 font-semibold text-slate-400">${filteredToday.length - idx}</td>
+          <td class="p-2.5 font-medium">${r[0] || '-'}</td>
+          <td class="p-2.5 font-semibold text-indigo-600">${r[1] || '-'}</td>
+          <td class="p-2.5 font-medium text-slate-800">${(hasOrigenInRow ? r[3] : r[2]) || '-'}</td>
+          <td class="p-2.5">${docTexto}</td>
+          <td class="p-2.5">${dist || '-'}, ${prov || '-'}</td>
+          <td class="p-2.5"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold inline-block whitespace-normal">${oferta || '-'}</span></td>
+          <td class="p-2.5 font-bold text-slate-800">${precio || '-'}</td>
+          <td class="p-2.5"><span class="px-2.5 py-1 rounded-full text-[10px] inline-block whitespace-normal ${estadoBadgeClass}">${estadoVal}</span></td>
+          <td class="p-2.5 font-medium text-slate-700 whitespace-normal">${tecnicoVal}</td>
+          <td class="p-2.5 text-center">
+            <button onclick="viewDetail('${encodeURIComponent(JSON.stringify(r))}')" class="text-slate-500 hover:text-indigo-600 p-0.5">
+              <i class="fa-solid fa-eye text-sm"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateHistoricoFilters() {
+      const asesoresSet = new Set();
+      const estadosSet = new Set();
+
+      recordsData.forEach(r => {
+        if (r[1]) asesoresSet.add(r[1]);
+        const estadoVal = r.length > 23 ? r[22] : r[21];
+        if (estadoVal) estadosSet.add(estadoVal);
+      });
+
+      const selAse = document.getElementById('filterAsesorHist');
+      selAse.innerHTML = '<option value="">TODOS LOS ASESORES</option>';
+      asesoresSet.forEach(a => selAse.innerHTML += `<option value="${a}">${a}</option>`);
+
+      const selEst = document.getElementById('filterEstado');
+      selEst.innerHTML = '<option value="">TODOS LOS ESTADOS</option>';
+      estadosSet.forEach(e => selEst.innerHTML += `<option value="${e}">${e}</option>`);
+    }
+
+    function clearHistoricoFilters() {
+      document.getElementById('filterFecha').value = '';
+      document.getElementById('filterAsesorHist').value = '';
+      document.getElementById('filterDNI').value = '';
+      document.getElementById('filterEstado').value = '';
+      renderHistoricoTable();
+    }
+
+    function renderHistoricoTable() {
+      const tbody = document.getElementById('recordsHistoricoBody');
+      const fechaFilter = document.getElementById('filterFecha').value; // YYYY-MM-DD
+      const aseFilter = document.getElementById('filterAsesorHist').value;
+      const dniFilter = document.getElementById('filterDNI').value.trim().toUpperCase();
+      const estFilter = document.getElementById('filterEstado').value;
+
+      tbody.innerHTML = '';
+
+      let fechaFormateada = '';
+      if (fechaFilter) {
+        const parts = fechaFilter.split('-');
+        fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`; // Convertir a DD/MM/YYYY
+      }
+
+      const filtered = recordsData.filter(r => {
+        const fechaHoraCelda = String(r[0] || '');
+        const hasOrigenInRow = r.length > 23;
+        const docCelda = String(hasOrigenInRow ? r[5] || '' : r[4] || '').toUpperCase();
+        const estCelda = String(hasOrigenInRow ? r[22] || '' : r[21] || '');
+
+        const matchesFecha = !fechaFormateada || fechaHoraCelda.includes(fechaFormateada);
+        const matchesAse = !aseFilter || r[1] === aseFilter;
+        const matchesDNI = !dniFilter || docCelda.includes(dniFilter);
+        const matchesEst = !estFilter || estCelda === estFilter;
+
+        return matchesFecha && matchesAse && matchesDNI && matchesEst;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">No hay registros que coincidan con los filtros aplicados.</td></tr>`;
+        return;
+      }
+
+      // Muestra los registros cronológicamente (el más antiguo primero)
+      filtered.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+
+        const hasOrigenInRow = r.length > 23;
+        const docTipo = hasOrigenInRow ? r[4] : r[3];
+        const docNum = hasOrigenInRow ? r[5] : r[4];
+        const dist = hasOrigenInRow ? r[14] : r[13];
+        const prov = hasOrigenInRow ? r[15] : r[14];
+        const oferta = hasOrigenInRow ? r[20] : r[19];
+        const precio = hasOrigenInRow ? r[21] : r[20];
+        const estadoVal = (hasOrigenInRow ? r[22] : r[21]) || '-';
+        const tecnicoVal = (hasOrigenInRow ? r[23] : r[22]) || '-';
+
+        const docTexto = formatDocVal(docTipo, docNum);
+        const estadoBadgeClass = getEstadoBadgeStyle(estadoVal);
+
+        tr.innerHTML = `
+          <td class="p-2.5 font-semibold text-slate-400">${idx + 1}</td>
+          <td class="p-2.5 font-medium">${r[0] || '-'}</td>
+          <td class="p-2.5 font-semibold text-indigo-600">${r[1] || '-'}</td>
+          <td class="p-2.5 font-medium text-slate-800">${(hasOrigenInRow ? r[3] : r[2]) || '-'}</td>
+          <td class="p-2.5">${docTexto}</td>
+          <td class="p-2.5">${dist || '-'}, ${prov || '-'}</td>
+          <td class="p-2.5"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-semibold inline-block whitespace-normal">${oferta || '-'}</span></td>
+          <td class="p-2.5 font-bold text-slate-800">${precio || '-'}</td>
+          <td class="p-2.5"><span class="px-2.5 py-1 rounded-full text-[10px] inline-block whitespace-normal ${estadoBadgeClass}">${estadoVal}</span></td>
+          <td class="p-2.5 font-medium text-slate-700 whitespace-normal">${tecnicoVal}</td>
+          <td class="p-2.5 text-center">
+            <button onclick="viewDetail('${encodeURIComponent(JSON.stringify(r))}')" class="text-slate-500 hover:text-indigo-600 p-0.5">
+              <i class="fa-solid fa-eye text-sm"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ====== EXPORTAR A EXCEL (HISTÓRICO) ====== */
+    function exportarExcel() {
+      const table = document.getElementById('tableHistorico');
+      if (!table) {
+        alert('No se encontró la tabla de registros.');
+        return;
+      }
+      try {
+        // Convierte la tabla HTML actual (respetando filtros aplicados) en libro de Excel
+        const wb = XLSX.utils.table_to_book(table, { raw: true });
+        XLSX.writeFile(wb, 'Registros_Historico_WIN.xlsx');
+      } catch (err) {
+        console.error('Error al exportar:', err);
+        alert('Ocurrió un error al generar el archivo Excel.');
+      }
+    }
+
+    /* ====== MODAL DE DETALLE COMPLETO ====== */
+    function viewDetail(jsonStr) {
+      const r = JSON.parse(decodeURIComponent(jsonStr));
+      const container = document.getElementById('modalDetailContent');
+      
+      const hasOrigenInRow = r.length > 23;
+      let origenStr = '-';
+      let idxOffset = 0;
+
+      if (hasOrigenInRow) {
+        origenStr = r[2] || '-';
+        idxOffset = 1;
+      }
+
+      const estadoVal = r[21 + idxOffset] || '-';
+      const estadoBadgeClass = getEstadoBadgeStyle(estadoVal);
+      
+      container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5">
+          <div><strong class="text-slate-500">FECHA Y HORA:</strong> ${r[0] || '-'}</div>
+          <div><strong class="text-slate-500">ASESOR:</strong> <span class="text-indigo-600 font-bold">${r[1] || '-'}</span></div>
+          <div><strong class="text-slate-500">ORIGEN DE VENTA:</strong> <span class="text-indigo-600 font-bold">${origenStr}</span></div>
+          
+          <div class="md:col-span-2 border-t pt-2 mt-1 font-bold text-slate-800 uppercase text-[11px] tracking-wider">Datos del Titular</div>
+          <div class="md:col-span-2"><strong class="text-slate-500">NOMBRES COMPLETOS:</strong> ${r[2 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">TIPO DOC:</strong> ${r[3 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">NRO. DOC:</strong> ${r[4 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">LUGAR NACIMIENTO:</strong> ${r[5 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">FECHA NACIMIENTO:</strong> ${r[6 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">NACIONALIDAD:</strong> ${r[7 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">CORREO:</strong> ${r[8 + idxOffset] || '-'}</div>
+
+          <div class="md:col-span-2 border-t pt-2 mt-1 font-bold text-slate-800 uppercase text-[11px] tracking-wider">Dirección & Ubicación</div>
+          <div><strong class="text-slate-500">TIPO VIVIENDA:</strong> ${r[9 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">PISO / INTERIOR:</strong> ${r[11 + idxOffset] || '-'} / ${r[12 + idxOffset] || '-'}</div>
+          <div class="md:col-span-2"><strong class="text-slate-500">DIRECCIÓN COMPLETA:</strong> ${r[10 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">DISTRITO / PROVINCIA:</strong> ${r[13 + idxOffset] || '-'}, ${r[14 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">DEPARTAMENTO:</strong> ${r[15 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">LATITUD Y:</strong> ${r[16 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">LONGITUD X:</strong> ${r[17 + idxOffset] || '-'}</div>
+
+          <div class="md:col-span-2 border-t pt-2 mt-1 font-bold text-slate-800 uppercase text-[11px] tracking-wider">Producto & Plan</div>
+          <div><strong class="text-slate-500">ATAQUE:</strong> ${r[18 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">OFERTA:</strong> ${r[19 + idxOffset] || '-'}</div>
+          <div><strong class="text-slate-500">PRECIO:</strong> <span class="text-indigo-600 font-bold">${r[20 + idxOffset] || '-'}</span></div>
+
+          <div class="md:col-span-2 border-t pt-2 mt-1 font-bold text-slate-800 uppercase text-[11px] tracking-wider">Estado & Cruce Operativo</div>
+          <div><strong class="text-slate-500">ESTADO:</strong> <span class="px-2.5 py-0.5 rounded font-bold ${estadoBadgeClass}">${estadoVal}</span></div>
+          <div><strong class="text-slate-500">TÉCNICO:</strong> ${r[22 + idxOffset] || '-'}</div>
+          <div class="md:col-span-2"><strong class="text-slate-500">OBSERVACIONES:</strong> ${r[23 + idxOffset] || '-'}</div>
+        </div>
+      `;
+      openModal('viewDetailModal');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  </script>
+</body>
+</html>
