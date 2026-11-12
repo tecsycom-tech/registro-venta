@@ -560,7 +560,8 @@
         document.getElementById('precio').value.toUpperCase(),
         "", // ESTADO (Vacío por defecto al registrar)
         "", // TÉCNICO (Vacío por defecto al registrar)
-        ""  // OBSERVACIONES (Vacío por defecto al registrar)
+        "", // OBSERVACIONES (Vacío por defecto al registrar)
+        ""  // FEC_INSTALACION (Vacío por defecto al registrar)
       ];
 
       try {
@@ -842,7 +843,7 @@ PRECIO: ${document.getElementById('precio').value}`;
         "LUGAR NACIMIENTO", "FECHA NACIMIENTO", "NACIONALIDAD", "CORREO",
         "TIPO VIVIENDA", "DIRECCIÓN COMPLETA", "PISO", "INTERIOR", "DISTRITO",
         "PROVINCIA", "DEPARTAMENTO", "LATITUD Y", "LONGITUD X", "ATAQUE", "OFERTA", "PRECIO",
-        "ESTADO", "TECNICO", "OBSERVACIONES"
+        "ESTADO", "TECNICO", "OBSERVACIONES", "FEC_INSTALACION"
       ];
 
       const exportData = filtered.map(r => [
@@ -870,7 +871,8 @@ PRECIO: ${document.getElementById('precio').value}`;
         r[21] || '',  // Precio
         r[22] || '',  // Estado
         r[23] || '',  // Técnico
-        r[24] || ''   // Observaciones
+        r[24] || '',  // Observaciones
+        r[25] || ''   // fec_instalacion
       ]);
 
       const ws = XLSX.utils.aoa_to_sheet([headers, ...exportData]);
